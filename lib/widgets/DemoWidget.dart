@@ -15,6 +15,7 @@ Widget build(BuildContext context){
        );
      },
       child: new Text("NextPage"),
+
      ));
 }
 }

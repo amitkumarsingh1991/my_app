@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:my_app/widgets/Workspace.dart';
-import 'package:my_app/containers/NewsMoreDetails.dart';
+import 'package:my_app/widgets/BookMarked.dart';
+import 'package:my_app/widgets/HomeNewsList.dart';
+import 'package:my_app/widgets/NewsSort.dart';
+
 
 class PackageDetails extends StatefulWidget{
   @override
@@ -24,65 +23,58 @@ class PackageDetails extends StatefulWidget{
 //}
 
  class PackageDetail extends State<PackageDetails> {
-   List data;
-   Future<List> fetchPost(String category) async {
-     final String url = 'https://newsapi.org/v2/top-headlines?country=in&category=${category}&apiKey=3049e63f96e143f3be070d8f031f68d6';
-     final response = await http.get(url);
-     if (response.statusCode == 200) {
-       List list = json.decode(response.body)['articles'];
-       this.setState(() {
-         data = list;
-       });
-       return list;
-     } else {
-       // If that call was not successful, throw an error.
-       throw Exception('Failed to load post');
-     }
+   int _currentIndex = 0;
+   final List<Widget> _children = [
+     HomeNewsList(),
+     BookMarked(),
+     NewsSort()
+   ];
+   void onTabTapped(int index) {
+     print('checiign');
+     setState(() {
+       _currentIndex = index;
+     });
    }
 @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    this.fetchPost('sport');
+   // this.fetchPost('sport');
   }
 
   @override
   Widget build(BuildContext context) {
-    String url = 'https://c.ndtvimg.com/2018-09/0pvfjoro_jasprit-bumrah-reuters_625x300_08_September_18.jpg';
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Package Details"),
-      ),
-      body: Container(
-          child: this.data != null ? ListView.builder(
-          itemCount: data.length,
-          itemBuilder: (BuildContext context, int index){
-            return new Card(
-              child: Column(
-                children: <Widget>[
-                  new GestureDetector(
-                    onTap: (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => NewsMoreDetails()),
-                      );
-                    },child: Column(
-                    children: <Widget>[
-                      new Image.network(data[index]['urlToImage'] == null ? url : data[index]['urlToImage'],fit: BoxFit.fill),
-                      new Text(data[index]['description'] == null ? 'not found' : data[index]['description']),
-                    ],
-                  ),
-                  )
-
-                ],
+        // footer button
+        bottomNavigationBar: new Theme(
+          data: Theme.of(context).copyWith(
+              canvasColor: Colors.blue,
+              primaryColor: Colors.red,
+            ), // sets the inactive color of the `BottomNavigationBar`
+          child: new BottomNavigationBar(
+            onTap: onTabTapped,
+            currentIndex: _currentIndex,
+            items: [
+              new BottomNavigationBarItem(
+                icon: new Icon(Icons.menu),
+                title: new Text("Home"),
               ),
-
-            );
-          },
-
-        ) :  new WorkSpace(),// DATA LOADER
-
-    )
+              new BottomNavigationBarItem(
+                icon: new Icon(Icons.book),
+                title: new Text("save"),
+              ),
+              new BottomNavigationBarItem(
+                icon: new Icon(Icons.sort),
+                title: new Text("sort"),
+              ),
+            ],
+          ),
+        ),
+       body: new Stack(
+         children: <Widget>[
+           _children[_currentIndex],
+         ],
+       )
 
     );
   }
